@@ -440,7 +440,12 @@
     // ── Helpers ───────────────────────────────────────────
     function daysSince(iso) {
       if (!iso) return null;
-      const diff = Date.now() - new Date(iso).getTime();
+      const now = new Date();
+      const last = new Date(iso);
+      // Crear versiones con hora 00:00:00.000
+      const hoy = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const ultimoRiego = new Date(last.getFullYear(), last.getMonth(), last.getDate());
+      const diff = hoy.getTime() - ultimoRiego.getTime();
       return Math.floor(diff / (1000 * 60 * 60 * 24));
     }
 
