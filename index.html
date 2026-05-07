@@ -438,14 +438,22 @@
     let filterState = "all"; // all | ok | warn | urgent
 
     // ── Helpers ───────────────────────────────────────────
-    function daysSince(iso) {
+  function daysSince(iso) {
   if (!iso) return null;
   const watered = new Date(iso);
-  const wateredDay = new Date(watered.getFullYear(), watered.getMonth(), watered.getDate());
-  const today = new Date();
-  const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const diff = todayDay - wateredDay;
-  return Math.floor(diff / (1000 * 60 * 60 * 24));
+  // Truncar ambas a medianoche LOCAL
+  const wateredDay = new Date(
+    watered.getFullYear(), 
+    watered.getMonth(), 
+    watered.getDate()
+  );
+  const now = new Date();
+  const todayDay = new Date(
+    now.getFullYear(), 
+    now.getMonth(), 
+    now.getDate()
+  );
+  return Math.round((todayDay - wateredDay) / (1000 * 60 * 60 * 24));
 }
 
     function getCardState(days, frequency) {
