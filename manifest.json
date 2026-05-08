@@ -1,7 +1,7 @@
 {
   "name": "Mis Plantas",
   "short_name": "Plantas",
-  "start_url": "/",
+  "start_url": "/Riego/",
   "display": "standalone",
   "background_color": "#f5f0e8",
   "theme_color": "#f5f0e8",
