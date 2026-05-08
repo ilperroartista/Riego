@@ -658,7 +658,7 @@
     async function registerPush() {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
-      const reg = await navigator.serviceWorker.register('/sw.js');
+      const reg = await navigator.serviceWorker.register('/Riego/sw.js');
       await navigator.serviceWorker.ready;
 
       const permission = await Notification.requestPermission();
