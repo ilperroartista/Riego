@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <link rel="manifest" href="manifest.json" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -387,18 +386,11 @@
     }
   </style>
 </head>
-
 <body>
 
   <header class="app-header">
     <div>
       <h1>Mis Plantas</h1>
-      <button id="btn-notif" style="padding:12px 20px; font-size:16px; margin:20px 0;">
-      🔔 Activar notificaciones
-      </button>
-      <button id="btn-diag" style="padding:12px 20px; font-size:16px; margin:10px 0; background:#e8e0d0;">
-     🔍 Probar conexión
-      </button>
       <div class="subtitle">Registro de riego</div>
     </div>
     <span class="header-icon">🌿</span>
@@ -650,69 +642,5 @@
       if (!document.hidden) render();
     });
   </script>
-  <script>
-  const VAPID_PUBLIC_KEY = 'BA5A5LQ0lkVwc6NIuy3lwm_g_bjJd_VZFzXhFldW8OBif_MRADAcDatNxDSeioO4IML0nhqlxIeRPEWM6rDbmro';
-
-  function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-    const rawData = atob(base64);
-    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
-  }
-
-  async function registerPush() {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      alert('Tu navegador no soporta notificaciones push');
-      return;
-    }
-
-    try {
-      const reg = await navigator.serviceWorker.register('/Riego/sw.js');
-      await navigator.serviceWorker.ready;
-
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        alert('Permiso de notificaciones denegado. Puedes cambiarlo en Ajustes > Notificaciones.');
-        return;
-      }
-
-      let sub = await reg.pushManager.getSubscription();
-      if (!sub) {
-        sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-        });
-      }
-
-      const plantState = JSON.parse(localStorage.getItem('mis-plantas-v1') || '{}');
-      await fetch('https://plantas-server.onrender.com/ping', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscription: sub, plantState })
-      });
-
-      document.getElementById('btn-notif').textContent = '✅ Notificaciones activadas';
-      document.getElementById('btn-notif').disabled = true;
-    } catch (err) {
-      console.error('Error al registrar push:', err);
-      alert('Hubo un error: ' + err.message);
-    }
-  }
-
-  document.getElementById('btn-notif').addEventListener('click', registerPush);
-  document.getElementById('btn-diag').addEventListener('click', async () => {
-  try {
-    const res = await fetch('https://plantas-server.onrender.com/ping', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subscription: { endpoint: 'test-diag' }, plantState: {} })
-    });
-    const json = await res.json();
-    alert('Éxito: ' + JSON.stringify(json));
-  } catch (e) {
-    alert('Error: ' + e.message);
-  }
-});
-</script>
 </body>
 </html>
