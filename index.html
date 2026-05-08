@@ -393,6 +393,9 @@
   <header class="app-header">
     <div>
       <h1>Mis Plantas</h1>
+      <button id="btn-notif" style="padding:12px 20px; font-size:16px; margin:20px 0;">
+      🔔 Activar notificaciones
+      </button>
       <div class="subtitle">Registro de riego</div>
     </div>
     <span class="header-icon">🌿</span>
@@ -645,24 +648,30 @@
     });
   </script>
   <script>
-    // ── Push notifications setup ──────────────────────────
-    const VAPID_PUBLIC_KEY = 'BA5A5LQ0lkVwc6NIuy3lwm_g_bjJd_VZFzXhFldW8OBif_MRADAcDatNxDSeioO4IML0nhqlxIeRPEWM6rDbmro';
+  const VAPID_PUBLIC_KEY = 'BA5A5LQ0lkVwc6NIuy3lwm_g_bjJd_VZFzXhFldW8OBif_MRADAcDatNxDSeioO4IML0nhqlxIeRPEWM6rDbmro';
 
-    function urlBase64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-      const rawData = atob(base64);
-      return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+  }
+
+  async function registerPush() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      alert('Tu navegador no soporta notificaciones push');
+      return;
     }
 
-    async function registerPush() {
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-
+    try {
       const reg = await navigator.serviceWorker.register('/Riego/sw.js');
       await navigator.serviceWorker.ready;
 
       const permission = await Notification.requestPermission();
-      if (permission !== 'granted') return;
+      if (permission !== 'granted') {
+        alert('Permiso de notificaciones denegado. Puedes cambiarlo en Ajustes > Notificaciones.');
+        return;
+      }
 
       let sub = await reg.pushManager.getSubscription();
       if (!sub) {
@@ -678,9 +687,16 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subscription: sub, plantState })
       });
-    }
 
-    registerPush();
-  </script>
+      document.getElementById('btn-notif').textContent = '✅ Notificaciones activadas';
+      document.getElementById('btn-notif').disabled = true;
+    } catch (err) {
+      console.error('Error al registrar push:', err);
+      alert('Hubo un error: ' + err.message);
+    }
+  }
+
+  document.getElementById('btn-notif').addEventListener('click', registerPush);
+</script>
 </body>
 </html>
