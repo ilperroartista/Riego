@@ -702,7 +702,7 @@
   document.getElementById('btn-notif').addEventListener('click', registerPush);
   document.getElementById('btn-diag').addEventListener('click', async () => {
   try {
-    const res = await fetch('https://plantas-server.onrender.com/subscribe', {
+    const res = await fetch(''https://plantas-server.onrender.com/ping'', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ subscription: { endpoint: 'test-diag' }, plantState: {} })
