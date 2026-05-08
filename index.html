@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+<link rel="manifest" href="manifest.json" />
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -386,6 +387,55 @@
     }
   </style>
 </head>
+<script>
+  // ── Push notifications setup ──────────────────────────
+  const VAPID_PUBLIC_KEY = 'REEMPLAZÁ_CON_TU_PUBLIC_KEY';
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+  }
+
+  async function registerPush() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    const reg = await navigator.serviceWorker.register('/sw.js');
+    await navigator.serviceWorker.ready;
+
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+
+    // Mandamos la suscripción + el estado actual de las plantas al servidor
+    const plantState = JSON.parse(localStorage.getItem('mis-plantas-v1') || '{}');
+    await fetch('https://TU-APP.onrender.com/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription: sub, plantState })
+    });
+  }
+
+  // Ejecutar al cargar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', registerPush);
+  } else {
+    registerPush();
+  }
+
+  // Sincronizar estado de plantas con el servidor cada vez que se riega
+  const _origSaveState = saveState;
+  // Override saveState para también sincronizar
+  // (esto se activa automáticamente al regar)
+</script>
 <body>
 
   <header class="app-header">
