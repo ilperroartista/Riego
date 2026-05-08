@@ -396,6 +396,9 @@
       <button id="btn-notif" style="padding:12px 20px; font-size:16px; margin:20px 0;">
       🔔 Activar notificaciones
       </button>
+      <button id="btn-diag" style="padding:12px 20px; font-size:16px; margin:10px 0; background:#e8e0d0;">
+     🔍 Probar conexión
+      </button>
       <div class="subtitle">Registro de riego</div>
     </div>
     <span class="header-icon">🌿</span>
@@ -697,6 +700,19 @@
   }
 
   document.getElementById('btn-notif').addEventListener('click', registerPush);
+  document.getElementById('btn-diag').addEventListener('click', async () => {
+  try {
+    const res = await fetch('https://plantas-server.onrender.com/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription: { endpoint: 'test-diag' }, plantState: {} })
+    });
+    const json = await res.json();
+    alert('Éxito: ' + JSON.stringify(json));
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+});
 </script>
 </body>
 </html>
